@@ -1,13 +1,15 @@
 package eu.integrable.storagemanager;
 
 import eu.integrable.storagemanager.property.CredentialsProperty;
+import eu.integrable.storagemanager.property.StorageProperty;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 @SpringBootApplication
 @EnableConfigurationProperties(value = {
-        CredentialsProperty.class
+        CredentialsProperty.class,
+        StorageProperty.class
 })
 public class StorageManagerApplication {
 

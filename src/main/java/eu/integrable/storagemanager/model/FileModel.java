@@ -1,6 +1,8 @@
 package eu.integrable.storagemanager.model;
 
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -12,9 +14,11 @@ import java.time.LocalDateTime;
 
 
 @Data
+@Builder
+@NoArgsConstructor
 @Table(name = "FILE")
 @Entity
-public class File {
+public class FileModel {
     @Column(name = "ID", nullable = false)
     @Id
     private String id;
@@ -29,7 +33,10 @@ public class File {
     private String permission;
 
     @Column(nullable = false)
-    private String sha256;
+    private Long size;
+
+    @Column(nullable = false)
+    private String checksum;
 
     @CreationTimestamp
     private LocalDateTime creationTime;
