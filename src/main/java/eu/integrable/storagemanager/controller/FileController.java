@@ -7,6 +7,8 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +21,7 @@ import java.util.UUID;
 
 
 @RestController
-@RequestMapping("/api/v1/file/")
+@RequestMapping("/api/v1/file")
 public class FileController {
 
     private static final Logger log = LoggerFactory.getLogger(FileController.class);
@@ -41,9 +43,33 @@ public class FileController {
         }
     }
 
+    @GetMapping("{id}")
+    public ResponseEntity downloadFile(@PathVariable String id) {
+
+        Optional<FileModel> fileModel = fileModelRepository.findById(id);
+        if (fileModel.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.APPLICATION_JSON).body("No file");
+        }
+
+        try {
+            Resource resource = fileService.loadFile(id);
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(fileModel.get().getFilename()))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileModel.get().getFilename() + "\"")
+                    .body(resource);
+
+        } catch (IOException ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON).body("Can not download file");
+        }
+    }
+
     @PostMapping("")
     public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile multipartFile,
-                                        @RequestBody FileModel fileDescription) {
+                                        @RequestParam(required = true) String filename,
+                                        @RequestParam(required = false) String description,
+                                        @RequestParam(required = false) String owner,
+                                        @RequestParam(required = false) String permission) {
 
         String id = UUID.randomUUID().toString();
 
@@ -56,10 +82,10 @@ public class FileController {
 
         FileModel fileModel = FileModel.builder()
                 .id(id)
-                .filename(fileDescription.getFilename())
-                .description(fileDescription.getDescription())
-                .owner(fileDescription.getOwner())
-                .permission(fileDescription.getPermission())
+                .filename(filename)
+                .description(description)
+                .owner(owner)
+                .permission(permission)
                 .size(multipartFile.getSize())
                 .checksum(checksum)
                 .build();
@@ -73,6 +99,6 @@ public class FileController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON).body(ex.getMessage());
         }
 
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(fileModelRepository);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(fileModel);
     }
 }
