@@ -1,5 +1,7 @@
 package eu.integrable.storagemanager.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.http.MediaType;
@@ -16,6 +18,8 @@ public class InfoController {
     private BuildProperties buildProperties;
 
     @GetMapping("getVersion")
+    @Operation(summary = "Returns version")
+    @SecurityRequirement(name = "bearer")
     public ResponseEntity<String> getVersion() {
 
         return ResponseEntity.ok()

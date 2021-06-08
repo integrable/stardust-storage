@@ -1,8 +1,11 @@
 package eu.integrable.storagemanager.security;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -12,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
@@ -62,8 +66,17 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             // Get username
             String user = decodedJWT.getSubject();
 
+            // Roles / authorities
+            List<GrantedAuthority> authorities = new ArrayList<>();
+
+            // Check if allow to upload
+            Boolean isWriter = false;
+            Claim claim = decodedJWT.getClaim("writer");
+            if (!claim.isNull()) isWriter = claim.asBoolean();
+            if (isWriter == true) authorities.add(new SimpleGrantedAuthority("ROLE_WRITER"));
+
             if (user != null) {
-                return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
+                return new UsernamePasswordAuthenticationToken(user, null, authorities);
             }
 
         } catch (JWTVerificationException ex) {

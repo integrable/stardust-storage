@@ -1,6 +1,7 @@
 package eu.integrable.storagemanager.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,7 +23,7 @@ import java.time.LocalDateTime;
 @Table(name = "FILE")
 @Entity
 public class FileModel {
-    @Column(name = "ID", nullable = false)
+    @Column(nullable = false)
     @Id
     private String id;
 
@@ -34,6 +35,9 @@ public class FileModel {
     private String owner;
 
     private String permission;
+
+    @Column(nullable = false)
+    private String mediaType;
 
     @Column(nullable = false)
     private Long size;
