@@ -3,6 +3,7 @@ package eu.integrable.storagemanager.controller;
 import eu.integrable.storagemanager.model.FileModel;
 import eu.integrable.storagemanager.repository.FileModelRepository;
 import eu.integrable.storagemanager.service.FileService;
+import eu.integrable.storagemanager.service.PermissionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -33,27 +34,42 @@ public class FileController {
     @Autowired
     private FileModelRepository fileModelRepository;
 
+    @Autowired
+    private PermissionService permissionService;
+
     @GetMapping("{id}/description")
     @Operation(summary = "Get file description")
     @SecurityRequirement(name = "bearer")
-    public ResponseEntity getFileDescription(@PathVariable String id) {
+    public ResponseEntity getFileDescription(@PathVariable String id,
+                                             Authentication authentication) {
 
         Optional<FileModel> fileModel = fileModelRepository.findById(id);
-        if (fileModel.isPresent()) {
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(fileModel);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("File does not exist");
+        if (fileModel.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.APPLICATION_JSON).body("No file");
         }
+
+        // Check access permissions
+        if (!permissionService.isAccessPermitted(authentication, fileModel.get())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).contentType(MediaType.APPLICATION_JSON).body("No access");
+        }
+
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(fileModel.get());
     }
 
     @GetMapping("{id}")
     @Operation(summary = "Get file")
     @SecurityRequirement(name = "bearer")
-    public ResponseEntity downloadFile(@PathVariable String id) {
+    public ResponseEntity downloadFile(@PathVariable String id,
+                                       Authentication authentication) {
 
         Optional<FileModel> fileModel = fileModelRepository.findById(id);
         if (fileModel.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.APPLICATION_JSON).body("No file");
+        }
+
+        // Check access permissions
+        if (!permissionService.isAccessPermitted(authentication, fileModel.get())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).contentType(MediaType.APPLICATION_JSON).body("No access");
         }
 
         try {
@@ -80,7 +96,7 @@ public class FileController {
                                      @RequestParam(required = false) String mediatype,
                                      Authentication authentication) {
 
-        // Check if allow to upload
+        // Check if writer
         if (!authentication.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.equals(new SimpleGrantedAuthority("ROLE_WRITER")))) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).contentType(MediaType.APPLICATION_JSON).body("Not allowed to upload files");
         }
@@ -102,6 +118,11 @@ public class FileController {
             } catch (InvalidMediaTypeException ex) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("Wrong media-type/media-type not supported");
             }
+        }
+
+        // Check if permissions are correct
+        if (!permissionService.arePermissionsCorrect(authentication, permission)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("Wrong permissions format");
         }
 
         FileModel fileModel = FileModel.builder()
@@ -133,7 +154,7 @@ public class FileController {
     public ResponseEntity deleteFile(@PathVariable String id,
                                      Authentication authentication) {
 
-        // Check if allow to delete
+        // Check if writer
         if (!authentication.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.equals(new SimpleGrantedAuthority("ROLE_WRITER")))) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).contentType(MediaType.APPLICATION_JSON).body("Not allowed to delete files");
         }
@@ -141,6 +162,11 @@ public class FileController {
         Optional<FileModel> fileModel = fileModelRepository.findById(id);
         if (fileModel.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.APPLICATION_JSON).body("No file");
+        }
+
+        // Check access permissions
+        if (!permissionService.isAccessPermitted(authentication, fileModel.get())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).contentType(MediaType.APPLICATION_JSON).body("No access");
         }
 
         fileModelRepository.delete(fileModel.get());
@@ -168,7 +194,7 @@ public class FileController {
                                             @RequestParam(required = false) String mediatype,
                                             Authentication authentication) {
 
-        // Check if allow to update
+        // Check if writer
         if (!authentication.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.equals(new SimpleGrantedAuthority("ROLE_WRITER")))) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).contentType(MediaType.APPLICATION_JSON).body("Not allowed to update descriptions");
         }
@@ -176,6 +202,16 @@ public class FileController {
         Optional<FileModel> fileModel = fileModelRepository.findById(id);
         if (fileModel.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.APPLICATION_JSON).body("No file");
+        }
+
+        // Check access permissions
+        if (!permissionService.isAccessPermitted(authentication, fileModel.get())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).contentType(MediaType.APPLICATION_JSON).body("No access");
+        }
+
+        // Check if permissions are correct
+        if (!permissionService.arePermissionsCorrect(authentication, permission)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("Wrong permissions format");
         }
 
         if (filename != null) fileModel.get().setFilename(filename);
@@ -208,7 +244,7 @@ public class FileController {
                                      @RequestParam(required = false) String mediatype,
                                      Authentication authentication) {
 
-        // Check if allow to update
+        // Check if writer
         if (!authentication.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.equals(new SimpleGrantedAuthority("ROLE_WRITER")))) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).contentType(MediaType.APPLICATION_JSON).body("Not allowed to update files");
         }
@@ -216,6 +252,16 @@ public class FileController {
         Optional<FileModel> fileModel = fileModelRepository.findById(id);
         if (fileModel.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.APPLICATION_JSON).body("No file");
+        }
+
+        // Check access permissions
+        if (!permissionService.isAccessPermitted(authentication, fileModel.get())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).contentType(MediaType.APPLICATION_JSON).body("No access");
+        }
+
+        // Check if permissions are correct
+        if (!permissionService.arePermissionsCorrect(authentication, permission)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("Wrong permissions format");
         }
 
         String checksum = "";

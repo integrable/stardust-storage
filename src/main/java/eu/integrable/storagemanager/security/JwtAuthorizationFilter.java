@@ -69,10 +69,19 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             // Roles / authorities
             List<GrantedAuthority> authorities = new ArrayList<>();
 
+            // Check if admin
+            Boolean isAdmin = false;
+            Claim claimIsAdmin = decodedJWT.getClaim("admin");
+            if (!claimIsAdmin.isNull()) isAdmin = claimIsAdmin.asBoolean();
+            if (isAdmin == true) {
+                authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+                authorities.add(new SimpleGrantedAuthority("ROLE_WRITER"));
+            }
+
             // Check if allow to upload
             Boolean isWriter = false;
-            Claim claim = decodedJWT.getClaim("writer");
-            if (!claim.isNull()) isWriter = claim.asBoolean();
+            Claim claimIsWriter = decodedJWT.getClaim("writer");
+            if (!claimIsWriter.isNull()) isWriter = claimIsWriter.asBoolean();
             if (isWriter == true) authorities.add(new SimpleGrantedAuthority("ROLE_WRITER"));
 
             if (user != null) {
