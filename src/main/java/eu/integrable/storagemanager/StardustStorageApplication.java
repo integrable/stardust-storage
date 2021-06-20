@@ -17,10 +17,10 @@ import org.springframework.context.annotation.Bean;
         CredentialsProperty.class,
         StorageProperty.class
 })
-public class StorageManagerApplication {
+public class StardustStorageApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(StorageManagerApplication.class, args);
+        SpringApplication.run(StardustStorageApplication.class, args);
     }
 
     @Bean

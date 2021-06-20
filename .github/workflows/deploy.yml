@@ -35,9 +35,9 @@ jobs:
       - name: Build with Gradle
         run: |
           ./gradlew build
-          mkdir storage-manager
-          cp build/libs/* storage-manager/
-          zip -r storage-manager storage-manager
+          mkdir stardust-storage
+          cp build/libs/* stardust-storage/
+          zip -r stardust-storage stardust-storage
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -55,8 +55,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: ./storage-manager.zip
-          asset_name: storage-manager.zip
+          asset_path: ./stardust-storage.zip
+          asset_name: stardust-storage.zip
           asset_content_type: application/zip
 
       # Login against a Docker registry except on PR
