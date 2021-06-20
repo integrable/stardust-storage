@@ -1,4 +1,4 @@
-package eu.integrable.storagemanager.property;
+package eu.integrable.starduststorage.property;
 
 import lombok.Getter;
 import lombok.Setter;

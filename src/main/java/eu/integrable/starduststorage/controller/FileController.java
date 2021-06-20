@@ -1,9 +1,9 @@
-package eu.integrable.storagemanager.controller;
+package eu.integrable.starduststorage.controller;
 
-import eu.integrable.storagemanager.model.FileModel;
-import eu.integrable.storagemanager.repository.FileModelRepository;
-import eu.integrable.storagemanager.service.FileService;
-import eu.integrable.storagemanager.service.PermissionService;
+import eu.integrable.starduststorage.model.FileModel;
+import eu.integrable.starduststorage.repository.FileModelRepository;
+import eu.integrable.starduststorage.service.FileService;
+import eu.integrable.starduststorage.service.PermissionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.apache.commons.codec.digest.DigestUtils;

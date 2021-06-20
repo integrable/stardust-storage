@@ -1,7 +1,7 @@
-package eu.integrable.storagemanager;
+package eu.integrable.starduststorage;
 
-import eu.integrable.storagemanager.property.CredentialsProperty;
-import eu.integrable.storagemanager.property.StorageProperty;
+import eu.integrable.starduststorage.property.CredentialsProperty;
+import eu.integrable.starduststorage.property.StorageProperty;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityScheme;

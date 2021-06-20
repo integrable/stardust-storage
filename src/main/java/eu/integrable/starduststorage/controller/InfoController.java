@@ -1,4 +1,4 @@
-package eu.integrable.storagemanager.controller;
+package eu.integrable.starduststorage.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

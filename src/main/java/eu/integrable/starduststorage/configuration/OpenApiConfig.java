@@ -1,4 +1,4 @@
-package eu.integrable.storagemanager.configuration;
+package eu.integrable.starduststorage.configuration;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Contact;

@@ -1,7 +1,7 @@
-package eu.integrable.storagemanager.configuration;
+package eu.integrable.starduststorage.configuration;
 
-import eu.integrable.storagemanager.security.JwtAuthorizationFilter;
-import eu.integrable.storagemanager.security.JwtTokenService;
+import eu.integrable.starduststorage.security.JwtAuthorizationFilter;
+import eu.integrable.starduststorage.security.JwtTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

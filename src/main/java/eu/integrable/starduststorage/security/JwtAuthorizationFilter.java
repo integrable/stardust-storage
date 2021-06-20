@@ -1,4 +1,4 @@
-package eu.integrable.storagemanager.security;
+package eu.integrable.starduststorage.security;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.Claim;

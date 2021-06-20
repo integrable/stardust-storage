@@ -1,8 +1,7 @@
-package eu.integrable.storagemanager.service;
+package eu.integrable.starduststorage.service;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.integrable.storagemanager.model.FileModel;
+import eu.integrable.starduststorage.model.FileModel;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,6 @@
-package eu.integrable.storagemanager.service;
+package eu.integrable.starduststorage.service;
 
-import eu.integrable.storagemanager.property.StorageProperty;
+import eu.integrable.starduststorage.property.StorageProperty;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;

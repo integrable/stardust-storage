@@ -1,4 +1,4 @@
-package eu.integrable.storagemanager;
+package eu.integrable.starduststorage;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

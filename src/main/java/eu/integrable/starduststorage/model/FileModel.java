@@ -1,4 +1,4 @@
-package eu.integrable.storagemanager.model;
+package eu.integrable.starduststorage.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
