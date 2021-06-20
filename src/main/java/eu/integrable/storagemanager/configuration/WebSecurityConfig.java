@@ -27,9 +27,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         httpSecurity
                 .csrf().disable()
+
                 .authorizeRequests()
                 .antMatchers("/api-docs").permitAll()
                 .antMatchers("/api-docs.*").permitAll()
+
+                // Filtered in gateway
+                .antMatchers("/actuator/**").permitAll()
+
                 .anyRequest().authenticated()
                 .and()
                 .cors()
