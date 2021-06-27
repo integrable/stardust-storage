@@ -1,6 +1,5 @@
 package eu.integrable.starduststorage.controller;
 
-import eu.integrable.starduststorage.model.FileModel;
 import eu.integrable.starduststorage.model.GroupModel;
 import eu.integrable.starduststorage.repository.FileModelRepository;
 import eu.integrable.starduststorage.repository.GroupModelRepository;
@@ -10,15 +9,13 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.Optional;
 
 @RestController
@@ -26,9 +23,6 @@ import java.util.Optional;
 public class GroupController {
 
     private static final Logger log = LoggerFactory.getLogger(GroupController.class);
-
-    @Autowired
-    private FileModelRepository fileModelRepository;
 
     @Autowired
     private GroupModelRepository groupModelRepository;
@@ -63,10 +57,14 @@ public class GroupController {
     @SecurityRequirement(name = "bearer")
     public ResponseEntity setGroupInfo(@PathVariable String groupId,
                                        @RequestParam(required = false) String description,
-                                       @RequestParam(required = false) String owner,
                                        @RequestParam(required = false) String permission,
                                        @RequestParam(required = false) Long quota,
                                        Authentication authentication) {
+
+        // Check if writer
+        if (!authentication.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.equals(new SimpleGrantedAuthority("ROLE_WRITER")))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).contentType(MediaType.APPLICATION_JSON).body("Not allowed to update files");
+        }
 
         // Get group model
         Optional<GroupModel> gm = groupModelRepository.findById(groupId);
@@ -74,6 +72,10 @@ public class GroupController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).contentType(MediaType.APPLICATION_JSON).body("The group exists");
         }
 
+        // Get owner
+        String owner = authentication.getPrincipal().toString();
+
+        // Create Group Model
         GroupModel groupModel = GroupModel.builder()
                 .id(groupId)
                 .description(description)
@@ -82,6 +84,7 @@ public class GroupController {
                 .quota(quota)
                 .build();
 
+        // Store in database
         groupModel = groupModelRepository.save(groupModel);
 
         return ResponseEntity.ok()
@@ -96,14 +99,22 @@ public class GroupController {
     public ResponseEntity setGroupInfo(@PathVariable String groupId,
                                        Authentication authentication) {
 
+        // Check if writer
+        if (!authentication.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.equals(new SimpleGrantedAuthority("ROLE_WRITER")))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).contentType(MediaType.APPLICATION_JSON).body("Not allowed to update files");
+        }
+
         // Get group model
         Optional<GroupModel> groupModel = groupModelRepository.findById(groupId);
         if (groupModel.isEmpty()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).contentType(MediaType.APPLICATION_JSON).body("The group does not exist");
         }
 
+        // Delete
         groupModelRepository.delete(groupModel.get());
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body("Deleted");
     }
 }

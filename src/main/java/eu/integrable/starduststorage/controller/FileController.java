@@ -96,7 +96,6 @@ public class FileController {
     public ResponseEntity uploadFile(@RequestParam("file") MultipartFile file,
                                      @RequestParam(required = true) String filename,
                                      @RequestParam(required = false) String description,
-                                     @RequestParam(required = false) String owner,
                                      @RequestParam(required = false, name = "group") String groupId,
                                      @RequestParam(required = false) String permission,
                                      @RequestParam(required = false) String mediatype,
@@ -126,11 +125,6 @@ public class FileController {
             }
         }
 
-//        // Check if permissions are correct
-//        if (!permissionService.arePermissionsCorrect(authentication, permission)) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("Wrong permissions format");
-//        }
-
         // Get a group
         Optional<GroupModel> group = Optional.empty();
         if (groupId != null) {
@@ -140,6 +134,10 @@ public class FileController {
             }
         }
 
+        // Get owner
+        String owner = authentication.getPrincipal().toString();
+
+        // Create File Model
         FileModel fileModel = FileModel.builder()
                 .id(id)
                 .filename(filename)
@@ -152,8 +150,10 @@ public class FileController {
                 .mediaType(mediatype)
                 .build();
 
+        // Store File Model in database
         fileModelRepository.save(fileModel);
 
+        // Save file in media
         try {
             fileService.saveFile(file, id);
         } catch (IOException ex) {
@@ -205,7 +205,6 @@ public class FileController {
     public ResponseEntity updateDescription(@PathVariable String id,
                                             @RequestParam(required = false) String filename,
                                             @RequestParam(required = false) String description,
-                                            @RequestParam(required = false) String owner,
                                             @RequestParam(required = false, name = "group") String groupId,
                                             @RequestParam(required = false) String permission,
                                             @RequestParam(required = false) String mediatype,
@@ -233,7 +232,6 @@ public class FileController {
 
         if (filename != null) fileModel.get().setFilename(filename);
         if (description != null) fileModel.get().setDescription(description);
-        if (owner != null) fileModel.get().setOwner(owner);
         if (groupId != null) {
             // Get a group
             Optional<GroupModel> group = groupModelRepository.findById(groupId);
@@ -264,7 +262,6 @@ public class FileController {
                                      @RequestParam("file") MultipartFile multipartFile,
                                      @RequestParam(required = false) String filename,
                                      @RequestParam(required = false) String description,
-                                     @RequestParam(required = false) String owner,
                                      @RequestParam(required = false, name = "group") String groupId,
                                      @RequestParam(required = false) String permission,
                                      @RequestParam(required = false) String mediatype,
@@ -299,7 +296,6 @@ public class FileController {
 
         if (filename != null) fileModel.get().setFilename(filename);
         if (description != null) fileModel.get().setDescription(description);
-        if (owner != null) fileModel.get().setOwner(owner);
         if (groupId != null) {
             // Get a group
             Optional<GroupModel> group = groupModelRepository.findById(groupId);
