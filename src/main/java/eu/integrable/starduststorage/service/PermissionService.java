@@ -2,6 +2,7 @@ package eu.integrable.starduststorage.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.integrable.starduststorage.model.FileModel;
+import eu.integrable.starduststorage.model.GroupModel;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,11 @@ public class PermissionService {
             ex.printStackTrace();
             return false;
         }
+    }
+
+    public boolean isAccessPermitted(Authentication authentication, GroupModel groupModel) {
+        // TODO
+        return true;
     }
 
     public boolean arePermissionsCorrect(Authentication authentication, String permissionsJson) {

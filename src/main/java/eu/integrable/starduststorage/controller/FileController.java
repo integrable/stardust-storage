@@ -1,7 +1,9 @@
 package eu.integrable.starduststorage.controller;
 
 import eu.integrable.starduststorage.model.FileModel;
+import eu.integrable.starduststorage.model.GroupModel;
 import eu.integrable.starduststorage.repository.FileModelRepository;
+import eu.integrable.starduststorage.repository.GroupModelRepository;
 import eu.integrable.starduststorage.service.FileService;
 import eu.integrable.starduststorage.service.PermissionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,7 +25,7 @@ import java.util.UUID;
 
 
 @RestController
-@RequestMapping("/api/v1/file")
+@RequestMapping("/api/v1/storage/file")
 public class FileController {
 
     private static final Logger log = LoggerFactory.getLogger(FileController.class);
@@ -33,6 +35,9 @@ public class FileController {
 
     @Autowired
     private FileModelRepository fileModelRepository;
+
+    @Autowired
+    private GroupModelRepository groupModelRepository;
 
     @Autowired
     private PermissionService permissionService;
@@ -92,6 +97,7 @@ public class FileController {
                                      @RequestParam(required = true) String filename,
                                      @RequestParam(required = false) String description,
                                      @RequestParam(required = false) String owner,
+                                     @RequestParam(required = false, name = "group") String groupId,
                                      @RequestParam(required = false) String permission,
                                      @RequestParam(required = false) String mediatype,
                                      Authentication authentication) {
@@ -120,9 +126,18 @@ public class FileController {
             }
         }
 
-        // Check if permissions are correct
-        if (!permissionService.arePermissionsCorrect(authentication, permission)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("Wrong permissions format");
+//        // Check if permissions are correct
+//        if (!permissionService.arePermissionsCorrect(authentication, permission)) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("Wrong permissions format");
+//        }
+
+        // Get a group
+        Optional<GroupModel> group = Optional.empty();
+        if (groupId != null) {
+            group = groupModelRepository.findById(groupId);
+            if (group.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.APPLICATION_JSON).body("Group does not exist");
+            }
         }
 
         FileModel fileModel = FileModel.builder()
@@ -130,6 +145,7 @@ public class FileController {
                 .filename(filename)
                 .description(description)
                 .owner(owner)
+                .group(group.orElse(null))
                 .permission(permission)
                 .size(file.getSize())
                 .checksum(checksum)
@@ -190,6 +206,7 @@ public class FileController {
                                             @RequestParam(required = false) String filename,
                                             @RequestParam(required = false) String description,
                                             @RequestParam(required = false) String owner,
+                                            @RequestParam(required = false, name = "group") String groupId,
                                             @RequestParam(required = false) String permission,
                                             @RequestParam(required = false) String mediatype,
                                             Authentication authentication) {
@@ -217,6 +234,14 @@ public class FileController {
         if (filename != null) fileModel.get().setFilename(filename);
         if (description != null) fileModel.get().setDescription(description);
         if (owner != null) fileModel.get().setOwner(owner);
+        if (groupId != null) {
+            // Get a group
+            Optional<GroupModel> group = groupModelRepository.findById(groupId);
+            if (group.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.APPLICATION_JSON).body("Group does not exist");
+            }
+            fileModel.get().setGroup(group.get());
+        }
         if (permission != null) fileModel.get().setPermission(permission);
         if (mediatype != null) {
             try {
@@ -240,6 +265,7 @@ public class FileController {
                                      @RequestParam(required = false) String filename,
                                      @RequestParam(required = false) String description,
                                      @RequestParam(required = false) String owner,
+                                     @RequestParam(required = false, name = "group") String groupId,
                                      @RequestParam(required = false) String permission,
                                      @RequestParam(required = false) String mediatype,
                                      Authentication authentication) {
@@ -274,6 +300,14 @@ public class FileController {
         if (filename != null) fileModel.get().setFilename(filename);
         if (description != null) fileModel.get().setDescription(description);
         if (owner != null) fileModel.get().setOwner(owner);
+        if (groupId != null) {
+            // Get a group
+            Optional<GroupModel> group = groupModelRepository.findById(groupId);
+            if (group.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.APPLICATION_JSON).body("Group does not exist");
+            }
+            fileModel.get().setGroup(group.get());
+        }
         if (permission != null) fileModel.get().setPermission(permission);
         if (mediatype != null) {
             try {

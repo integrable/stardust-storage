@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/info/")
+@RequestMapping("/api/v1/storage/info")
 public class InfoController {
 
     @Autowired

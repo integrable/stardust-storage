@@ -9,6 +9,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 
 @Getter
@@ -16,36 +17,25 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "db_file")
+@Table(name = "db_group")
 @Entity
-public class FileModel {
+public class GroupModel {
     @Column(nullable = false)
     @Id
     private String id;
 
-    @Column(nullable = false)
-    private String filename;
-
     private String description;
-
-    @ManyToOne
-    @JoinColumn(name = "file_id", nullable = true)
-    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-    @JsonIdentityReference(alwaysAsId = true)
-    private GroupModel group;
 
     private String owner;
 
     private String permission;
 
-    @Column(nullable = false)
-    private String mediaType;
+    private Long quota;
 
-    @Column(nullable = false)
-    private Long size;
-
-    @Column(nullable = false)
-    private String checksum;
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
+    private Set<FileModel> files;
 
     @CreationTimestamp
     private LocalDateTime creationTime;
