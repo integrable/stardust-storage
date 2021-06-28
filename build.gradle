@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'eu.integrable'
-version = 'v0.13'
+version = 'v0.14'
 sourceCompatibility = '11'
 
 configurations {
