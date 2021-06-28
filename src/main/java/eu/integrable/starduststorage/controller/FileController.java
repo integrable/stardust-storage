@@ -156,8 +156,10 @@ public class FileController {
         // Save file in media
         try {
             fileService.saveFile(file, id);
+            group.ifPresent(groupModel -> groupModel.increaseSize(file.getSize()));
         } catch (IOException ex) {
             fileModelRepository.delete(fileModel);
+            group.ifPresent(groupModel -> groupModel.decreaseSize(file.getSize()));
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON).body(ex.getMessage());
         }
 
@@ -255,76 +257,4 @@ public class FileController {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(fileModel);
     }
 
-    @PutMapping("{id}")
-    @Operation(summary = "Update file")
-    @SecurityRequirement(name = "bearer")
-    public ResponseEntity updateFile(@PathVariable String id,
-                                     @RequestParam("file") MultipartFile multipartFile,
-                                     @RequestParam(required = false) String filename,
-                                     @RequestParam(required = false) String description,
-                                     @RequestParam(required = false, name = "group") String groupId,
-                                     @RequestParam(required = false) String permission,
-                                     @RequestParam(required = false) String mediatype,
-                                     Authentication authentication) {
-
-        // Check if writer
-        if (!authentication.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.equals(new SimpleGrantedAuthority("ROLE_WRITER")))) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).contentType(MediaType.APPLICATION_JSON).body("Not allowed to update files");
-        }
-
-        Optional<FileModel> fileModel = fileModelRepository.findById(id);
-        if (fileModel.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.APPLICATION_JSON).body("No file");
-        }
-
-        // Check access permissions
-        if (!permissionService.isAccessPermitted(authentication, fileModel.get())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).contentType(MediaType.APPLICATION_JSON).body("No access");
-        }
-
-        // Check if permissions are correct
-        if (!permissionService.arePermissionsCorrect(authentication, permission)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("Wrong permissions format");
-        }
-
-        String checksum = "";
-        try {
-            checksum = DigestUtils.sha256Hex(multipartFile.getInputStream());
-        } catch (IOException ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON).body(ex.getMessage());
-        }
-
-        if (filename != null) fileModel.get().setFilename(filename);
-        if (description != null) fileModel.get().setDescription(description);
-        if (groupId != null) {
-            // Get a group
-            Optional<GroupModel> group = groupModelRepository.findById(groupId);
-            if (group.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).contentType(MediaType.APPLICATION_JSON).body("Group does not exist");
-            }
-            fileModel.get().setGroup(group.get());
-        }
-        if (permission != null) fileModel.get().setPermission(permission);
-        if (mediatype != null) {
-            try {
-                MediaType.parseMediaType(mediatype);
-                fileModel.get().setMediaType(mediatype);
-            } catch (InvalidMediaTypeException ex) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("Wrong media-type/media-type not supported");
-            }
-        }
-        fileModel.get().setChecksum(checksum);
-        fileModel.get().setSize(multipartFile.getSize());
-
-        fileModelRepository.save(fileModel.get());
-
-        try {
-            fileService.saveFile(multipartFile, id);
-        } catch (IOException ex) {
-            fileModelRepository.delete(fileModel.get());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON).body(ex.getMessage());
-        }
-
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(fileModel);
-    }
 }

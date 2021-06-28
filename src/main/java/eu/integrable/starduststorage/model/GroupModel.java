@@ -32,6 +32,8 @@ public class GroupModel {
 
     private Long quota;
 
+    private Long size = 0L;
+
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
     @JsonIdentityReference(alwaysAsId = true)
@@ -42,4 +44,12 @@ public class GroupModel {
 
     @UpdateTimestamp
     private LocalDateTime modificationTime;
+
+    public void increaseSize(Long size) {
+        this.size += size;
+    }
+
+    public void decreaseSize(Long size) {
+        this.size -= size;
+    }
 }
