@@ -134,6 +134,24 @@ public class FileController {
             }
         }
 
+        // Check quota
+        if (group.isPresent()) {
+            Long quota = group.get().getQuota();
+            if (quota != null) {
+                Long size = group.get().getSize() + file.getSize();
+                if (size > quota) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).contentType(MediaType.APPLICATION_JSON).body("Quota reached");
+                }
+            }
+        }
+
+        // Check if permissions are correct
+        if (permission != null) {
+            if (!permissionService.arePermissionsCorrect(authentication, permission)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("Wrong permissions format");
+            }
+        }
+
         // Get owner
         String owner = authentication.getPrincipal().toString();
 
@@ -156,10 +174,16 @@ public class FileController {
         // Save file in media
         try {
             fileService.saveFile(file, id);
-            group.ifPresent(groupModel -> groupModel.increaseSize(file.getSize()));
+            group.ifPresent(groupModel -> {
+                groupModel.increaseSize(file.getSize());
+                groupModelRepository.save(groupModel);
+            });
         } catch (IOException ex) {
             fileModelRepository.delete(fileModel);
-            group.ifPresent(groupModel -> groupModel.decreaseSize(file.getSize()));
+            group.ifPresent(groupModel -> {
+                groupModel.decreaseSize(file.getSize());
+                groupModelRepository.save(groupModel);
+            });
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON).body(ex.getMessage());
         }
 
@@ -190,6 +214,12 @@ public class FileController {
         fileModelRepository.delete(fileModel.get());
 
         try {
+            // Decrease group size
+            GroupModel groupModel = fileModel.get().getGroup();
+            groupModel.decreaseSize(fileModel.get().getSize());
+            groupModelRepository.save(groupModel);
+
+            // Remove file
             fileService.deleteFile(id);
 
             return ResponseEntity.ok()

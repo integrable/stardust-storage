@@ -32,6 +32,7 @@ public class GroupModel {
 
     private Long quota;
 
+    @Builder.Default
     private Long size = 0L;
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)

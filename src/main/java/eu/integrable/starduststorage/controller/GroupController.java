@@ -78,8 +78,10 @@ public class GroupController {
         }
 
         // Check if permissions are correct
-        if (!permissionService.arePermissionsCorrect(authentication, permission)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("Wrong permissions format");
+        if (permission != null) {
+            if (!permissionService.arePermissionsCorrect(authentication, permission)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("Wrong permissions format");
+            }
         }
 
         // Get owner
@@ -128,8 +130,10 @@ public class GroupController {
         }
 
         // Check if permissions are correct
-        if (!permissionService.arePermissionsCorrect(authentication, permission)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("Wrong permissions format");
+        if (permission != null) {
+            if (!permissionService.arePermissionsCorrect(authentication, permission)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("Wrong permissions format");
+            }
         }
 
         if (description != null) {
